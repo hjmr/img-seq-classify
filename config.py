@@ -21,15 +21,15 @@ class Config:
     # フィルタの大きさ
     CONV_SIZE = 4
     # 第1層目のマップ数
-    CONV1_OUT_CHANNELS = 16
+    CONV1_OUT_CHANNELS = 32
     # 第2層目のマップ数
-    CONV2_OUT_CHANNELS = 32
+    CONV2_OUT_CHANNELS = 64
     # 第3層目のマップ数
-    CONV3_OUT_CHANNELS = 64
+    CONV3_OUT_CHANNELS = 128
 
     # -------------------------------------
     #  全結合層の情報
     # -------------------------------------
     # 第１層目のニューロン数は畳み込み層の出力から自動的に決まるので未指定
     # 第２層目のニューロン数
-    NUM_HIDDEN_NEURONS2 = 512
+    NUM_HIDDEN_NEURONS2 = 1024
