@@ -25,7 +25,7 @@ class Config:
     # 第2層目のマップ数
     CONV2_OUT_CHANNELS = 32
     # 第3層目のマップ数
-    CONV2_OUT_CHANNELS = 64
+    CONV3_OUT_CHANNELS = 64
 
     # -------------------------------------
     #  全結合層の情報

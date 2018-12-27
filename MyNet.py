@@ -33,6 +33,7 @@ class MySubNet(chainer.Chain):
         h = F.local_response_normalization(h)
         return h
 
+
 class MyNet(chainer.Chain):
     def __init__(self, image_num, gpuid=-1):
         img_channels = 1 if Cnf.IMAGE_MONO else 3
