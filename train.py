@@ -2,7 +2,7 @@ import argparse
 
 import chainer
 from chainer import optimizers, serializers, iterators, training
-from chainer.backends import cuda
+from chainer.backends import cuda, intel64
 from chainer.training import extensions
 
 from config import Config
@@ -28,28 +28,66 @@ def parse_arg():
                         help='plot loss and accuracy.')
     parser.add_argument('-r', '--resume_from_snapshot', type=str,
                         help='resume training from specified snapshot.')
-    parser.add_argument('data_files', type=str, nargs=2,
-                        help='plain text file for training and testing')
+    parser.add_argument('--arrange_data', action='store_true',
+                        help='arrange data to have the same number of data in each class.')
+    parser.add_argument('--ideep', action='store_true',
+                        help='use iDeep to accelerate computation.')
+    parser.add_argument('train_data', type=str, nargs=1,
+                        help='plain text file for training.')
+    parser.add_argument('test_data', type=str, nargs='?',
+                        help='plain text file for testing')
     return parser.parse_args()
+
+
+def arrange_data(all_data, all_labels):
+    data_of_class = {i: [] for i in range(Config.NUM_CLASSES)}
+    for d, l in zip(all_data, all_labels):
+        data_of_class[l].append(d)
+
+    max_len = max([len(d) for d in data_of_class.values()])
+
+    data = []
+    labels = []
+    for i in range(Config.NUM_CLASSES):
+        d = data_of_class[i]
+        data.extend([d[j % len(d)] for j in range(max_len)])
+        labels.extend([i] * max_len)
+    return data, labels
 
 
 def main():
     args = parse_arg()
+    if 0 <= args.gpuid and args.ideep:
+        print('GPU and iDeep cannot use simultaneously.')
+        return
 
     model = MyNet(args.image_num, gpuid=args.gpuid)
     if 0 <= args.gpuid:
         cuda.get_device_from_id(args.gpuid).use()
         model.to_gpu()
 
+    if args.ideep and intel64.is_ideep_available():
+        chainer.global_config.use_ideep = 'auto'
+        model.to_intel64()
+
     optimizer = optimizers.Adam()
     optimizer.setup(model)
 
-    train_images, train_labels = read_train_data(args.data_files[0], args.image_num)
-    train_data = chainer.datasets.TupleDataset(train_images, train_labels)
-    train_iter = iterators.SerialIterator(train_data, args.batch_size)
+    if args.test_data:
+        train_images, train_labels = read_train_data(args.train_data[0], args.image_num)
+        test_images, test_labels = read_train_data(args.test_data, args.image_num)
+        if args.arrange_data:
+            train_images, train_labels = arrange_data(train_images, train_labels)
+            test_images, test_labels = arrange_data(test_images, test_labels)
+        train_data = chainer.datasets.TupleDataset(train_images, train_labels)
+        test_data = chainer.datasets.TupleDataset(test_images, test_labels)
+    else:
+        data_images, data_labels = read_train_data(args.train_data[0], args.image_num)
+        data_tuples = chainer.datasets.TupleDataset(data_images, data_labels)
+        train_size = int(len(data_tuples) * 0.8)
+        train_data, test_data = chainer.datasets.split_dataset_random(data_tuples, train_size)
 
-    test_images, test_labels = read_train_data(args.data_files[1], args.image_num)
-    test_data = chainer.datasets.TupleDataset(test_images, test_labels)
+    train_iter = iterators.SerialIterator(train_data, args.batch_size)
     test_iter = iterators.SerialIterator(test_data, args.batch_size, repeat=False, shuffle=False)
 
     updater = training.updaters.StandardUpdater(train_iter, optimizer, device=args.gpuid)

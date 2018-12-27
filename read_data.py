@@ -31,8 +31,10 @@ def read_test_data(filename, image_num):
     # ファイルを開く
     with open(filename, 'r') as f:
         for line in f:
+            # 改行を除いてスペース区切りにする
+            words = line.rstrip().split()
             # イメージを読み込み
-            images.append(read_one_image(line.rstrip()))
+            images.append(read_one_image(words[0]))
 
     input_data = []
     for i in range(len(images) - (image_num - 1)):
