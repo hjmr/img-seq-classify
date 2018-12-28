@@ -34,10 +34,11 @@ def main():
     for i in range(len(test_images) - (args.image_num - 1)):
         test_data.append(np.concatenate(test_images[i:i + args.image_num]))
 
-    with chainer.using_config("train", False):
-        y = model(test_data)
-        pred = np.argmax(y)
-        print(pred)
+    with chainer.configuration.using_config('train', False):
+        with chainer.using_config('enable_backprop', False):
+            y = model.forward(test_data)
+            pred = np.argmax(y)
+            print(pred)
 
 
 if __name__ == '__main__':

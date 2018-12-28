@@ -62,16 +62,19 @@ class MyNet(chainer.Chain):
         for net in self.convNets:
             net.to_intel64()
 
-    def __call__(self, x, y_hat=None):
+    def forward(self, x):
         x_inp = F.split_axis(x, self.image_num, axis=2)
         h = [self.convNets[i].forward(x_inp[i]) for i in range(self.image_num)]
         h = F.concat(h, axis=2)
         h = F.dropout(F.relu(self.fullLayer1(h)))
-        y = F.relu(self.fullLayer2(h))
-        if y_hat is None:
-            return y
-        else:
-            loss = F.softmax_cross_entropy(y, y_hat)
-            accu = F.accuracy(y, y_hat)
-            chainer.report({'loss': loss, 'accuracy': accu}, observer=self)
-            return loss
+        return self.fullLayer2(h)
+
+    # def __call__(self, x, y_hat=None):
+    #     y = self.forward(x)
+    #     if y_hat is None:
+    #         return y
+    #     else:
+    #         loss = F.softmax_cross_entropy(y, y_hat)
+    #         accu = F.accuracy(y, y_hat)
+    #         chainer.report({'loss': loss, 'accuracy': accu}, observer=self)
+    #         return loss

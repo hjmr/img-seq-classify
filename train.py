@@ -1,6 +1,7 @@
 import argparse
 
 import chainer
+import chainer.links as L
 from chainer import optimizers, serializers, iterators, training
 from chainer.backends import cuda, intel64
 from chainer.training import extensions
@@ -61,7 +62,7 @@ def main():
         print('GPU and iDeep cannot use simultaneously.')
         return
 
-    model = MyNet(args.image_num, gpuid=args.gpuid)
+    model = L.Classifier(MyNet(args.image_num, gpuid=args.gpuid))
     if 0 <= args.gpuid:
         cuda.get_device_from_id(args.gpuid).use()
         model.to_gpu()

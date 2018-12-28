@@ -44,7 +44,7 @@ def main():
         with chainer.configuration.using_config('train', False):
             with chainer.using_config('enable_backprop', False):
                 for i in range(len(test_images)):
-                    y = model(xp.array([test_images[i]]))
+                    y = model.forward(xp.array([test_images[i]]))
                     pred = F.argmax(y)
                     if test_labels is not None:
                         results.append((pred.data, test_labels[i]))

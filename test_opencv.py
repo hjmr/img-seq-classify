@@ -1,6 +1,7 @@
 import argparse
 
 import numpy as np
+import chainer
 from chainer import serializers
 import chainer.functions as F
 
@@ -30,25 +31,27 @@ def main():
 
     images = []
 
-    while True:
-        rval, cv_img = vc.read()
-        if rval:
-            cv2.imshow("preview", cv_img)
-            img = normalize_image(Image.fromarray(cv_img[::-1, :, ::-1]))
-            images.append(img)
-            while args.image_num < len(images):
-                images.pop(0)
+    with chainer.configuration.using_config('train', False):
+        with chainer.using_config('enable_backprop', False):
+            while True:
+                rval, cv_img = vc.read()
+                if rval:
+                    cv2.imshow("preview", cv_img)
+                    img = normalize_image(Image.fromarray(cv_img[::-1, :, ::-1]))
+                    images.append(img)
+                    while args.image_num < len(images):
+                        images.pop(0)
 
-            if len(images) == args.image_num:
-                y = model(np.array([np.concatenate(images)]))
-                pred = F.argmax(y)
-                print(pred.data)
+                    if len(images) == args.image_num:
+                        y = model.forward(np.array([np.concatenate(images)]))
+                        pred = F.argmax(y)
+                        print(pred.data)
 
-        else:
-            print("None...")
+                else:
+                    print("None...")
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
 
 
 if __name__ == '__main__':
