@@ -29,7 +29,7 @@ def main():
 
     results = []
     for m in args.model_file:
-        print("testing for {} ... ".format(m))
+        print("# testing for {} ... ".format(m))
         serializers.load_npz(m, model)
 
         with chainer.using_config("train", False):
