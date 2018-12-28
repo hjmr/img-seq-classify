@@ -16,7 +16,7 @@ def parse_arg():
                         help='the number of images as a set of input.')
     parser.add_argument('-m', '--model_file', type=str, nargs='+',
                         help='load specified model file.')
-    parser.add_argument('test_file', type=str, nargs=1,
+    parser.add_argument('-t', '--test_file', type=str, nargs=1,
                         help='plain text file for testing')
     return parser.parse_args()
 
