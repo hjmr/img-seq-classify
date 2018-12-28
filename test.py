@@ -65,9 +65,9 @@ def main():
                 else:
                     v['TN'] += 1
             accuracy = (v['TP'] + v['TN']) / len(results)
-            precision = v['TP'] / (v['TP'] + v['FP'])
-            recall_rate = v['TP'] / (v['TP'] + v['FN'])
-            F_measure = 2 * recall_rate * precision / (recall_rate + precision)
+            precision = v['TP'] / (v['TP'] + v['FP']) if 0 < (v['TP'] + v['FP']) else 0
+            recall_rate = v['TP'] / (v['TP'] + v['FN']) if 0 < (v['TP'] + v['FN']) else 0
+            F_measure = 2 * recall_rate * precision / (recall_rate + precision) if 0 < (recall_rate + precision) else 0
             print('class:{}, accuracy:{}, precision:{}, recall_rate:{}, F_measure:{}'.format(
                 c, accuracy, precision, recall_rate, F_measure))
 
