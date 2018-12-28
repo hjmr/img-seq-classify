@@ -25,25 +25,7 @@ def read_one_image(filename):
     return normalize_image(Image.open(filename))
 
 
-def read_test_data(filename, image_num):
-    # データを入れる配列
-    images = []
-    # ファイルを開く
-    with open(filename, 'r') as f:
-        for line in f:
-            # 改行を除いてスペース区切りにする
-            words = line.rstrip().split()
-            # イメージを読み込み
-            images.append(read_one_image(words[0]))
-
-    input_data = []
-    for i in range(len(images) - (image_num - 1)):
-        input_data.append(np.concatenate(images[i:i + image_num], axis=1))
-
-    return input_data
-
-
-def read_train_data(filename, image_num):
+def read_data(filename, image_num):
     # データを入れる配列
     images = []
     labels = []
@@ -52,9 +34,9 @@ def read_train_data(filename, image_num):
         for line in f:
             # 改行を除いてスペース区切りにする
             words = line.rstrip().split()
+            # イメージを読み込み
+            images.append(read_one_image(words[0]))
             if 2 <= len(words):
-                # イメージを読み込み
-                images.append(read_one_image(words[0]))
                 # 対応するラベルを用意
                 labels.append(int(words[1]))
 
@@ -62,6 +44,8 @@ def read_train_data(filename, image_num):
     teach_data = []
     for i in range(len(images) - (image_num - 1)):
         input_data.append(np.concatenate(images[i:i + image_num], axis=1))
-        teach_data.append(labels[i + image_num // 2])
-
+        if 0 < len(labels):
+            teach_data.append(labels[i + image_num // 2])
+    if len(teach_data) == 0:
+        teach_data = None
     return input_data, teach_data

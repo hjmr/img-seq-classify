@@ -7,7 +7,7 @@ from chainer.training import extensions
 
 from config import Config
 from MyNet import MyNet
-from read_data import read_train_data
+from read_data import read_data
 
 
 def parse_arg():
@@ -74,15 +74,15 @@ def main():
     optimizer.setup(model)
 
     if args.test_data:
-        train_images, train_labels = read_train_data(args.train_data[0], args.image_num)
-        test_images, test_labels = read_train_data(args.test_data, args.image_num)
+        train_images, train_labels = read_data(args.train_data[0], args.image_num)
+        test_images, test_labels = read_data(args.test_data, args.image_num)
         if args.arrange_data:
             train_images, train_labels = arrange_data(train_images, train_labels)
             test_images, test_labels = arrange_data(test_images, test_labels)
         train_data = chainer.datasets.TupleDataset(train_images, train_labels)
         test_data = chainer.datasets.TupleDataset(test_images, test_labels)
     else:
-        data_images, data_labels = read_train_data(args.train_data[0], args.image_num)
+        data_images, data_labels = read_data(args.train_data[0], args.image_num)
         data_tuples = chainer.datasets.TupleDataset(data_images, data_labels)
         train_size = int(len(data_tuples) * 0.8)
         train_data, test_data = chainer.datasets.split_dataset_random(data_tuples, train_size)

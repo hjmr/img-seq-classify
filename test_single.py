@@ -7,7 +7,6 @@ from chainer import serializers
 
 from MyNet import MyNet
 from read_data import read_one_image
-from config import Config
 
 
 def parse_arg():
