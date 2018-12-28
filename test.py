@@ -1,9 +1,10 @@
 import argparse
 
-import numpy as np
+import numpy
 import chainer
 from chainer import serializers
 import chainer.functions as F
+from chainer.backends import cuda
 
 from MyNet import MyNet
 from config import Config
@@ -18,6 +19,8 @@ def parse_arg():
                         help='load specified model file.')
     parser.add_argument('-t', '--test_file', type=str, nargs=1,
                         help='plain text file for testing')
+    parser.add_argument('-g', '--gpuid', type=int, default=-1,
+                        help='GPU ID for calculation.')
     return parser.parse_args()
 
 
@@ -27,19 +30,26 @@ def main():
     test_images, test_labels = read_data(args.test_file[0], args.image_num)
     model = MyNet(args.image_num)
 
+    xp = numpy
+    if 0 <= args.gpuid:
+        cuda.get_device_from_id(args.gpuid).use()
+        model.to_gpu()
+        xp = cuda.cupy
+
     results = []
     for m in args.model_file:
         print("# testing for {} ... ".format(m))
         serializers.load_npz(m, model)
 
-        with chainer.using_config("train", False):
-            for i in range(len(test_images)):
-                y = model(np.array([test_images[i]]))
-                pred = F.argmax(y)
-                if test_labels is not None:
-                    results.append((pred.data, test_labels[i]))
-                else:
-                    print(pred.data)
+        with chainer.configuration.using_config('train', False):
+            with chainer.using_config('enable_backprop', False):
+                for i in range(len(test_images)):
+                    y = model(xp.array([test_images[i]]))
+                    pred = F.argmax(y)
+                    if test_labels is not None:
+                        results.append((pred.data, test_labels[i]))
+                    else:
+                        print(pred.data)
 
     # count TP,TF,FP,FF
     if test_labels is not None:
