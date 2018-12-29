@@ -4,6 +4,7 @@ import numpy
 import chainer
 from chainer import serializers
 import chainer.functions as F
+import chainer.links as L
 from chainer.backends import cuda
 
 from MyNet import MyNet
@@ -28,7 +29,7 @@ def main():
     args = parse_arg()
 
     test_images, test_labels = read_data(args.test_file[0], args.image_num)
-    model = MyNet(args.image_num)
+    model = L.Classifier(MyNet(args.image_num, gpuid=args.gpuid))
 
     xp = numpy
     if 0 <= args.gpuid:
@@ -44,7 +45,7 @@ def main():
         with chainer.configuration.using_config('train', False):
             with chainer.using_config('enable_backprop', False):
                 for i in range(len(test_images)):
-                    y = model.forward(xp.array([test_images[i]]))
+                    y = model.predictor.forward(xp.array([test_images[i]]))
                     pred = F.argmax(y)
                     if test_labels is not None:
                         results.append((pred.data, test_labels[i]))

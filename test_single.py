@@ -23,7 +23,7 @@ def parse_arg():
 def main():
     args = parse_arg()
 
-    model = MyNet(args.image_num)
+    model = L.Classifier(MyNet(args.image_num))
     serializers.load_npz(args.model_file[0], model)
 
     test_images = []
@@ -36,7 +36,7 @@ def main():
 
     with chainer.configuration.using_config('train', False):
         with chainer.using_config('enable_backprop', False):
-            y = model.forward(test_data)
+            y = model.predictor.forward(test_data)
             pred = np.argmax(y)
             print(pred)
 
