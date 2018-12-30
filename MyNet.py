@@ -11,12 +11,12 @@ class MySubNet(chainer.Chain):
     def __init__(self, ch1, cv1, ch2, cv2, ch3, cv3):
         super(MySubNet, self).__init__()
         with self.init_scope():
-            self.conv11 = L.Convolution2D(ch1, cv1)
-            self.conv12 = L.Convolution2D(ch1, cv1)
-            self.conv21 = L.Convolution2D(ch2, cv2)
-            self.conv22 = L.Convolution2D(ch2, cv2)
-            self.conv31 = L.Convolution2D(ch3, cv3)
-            self.conv32 = L.Convolution2D(ch3, cv3)
+            self.conv11 = L.Convolution2D(ch1, cv1, pad=cv1-1)
+            self.conv12 = L.Convolution2D(ch1, cv1, pad=cv1-1)
+            self.conv21 = L.Convolution2D(ch2, cv2, pad=cv2-1)
+            self.conv22 = L.Convolution2D(ch2, cv2, pad=cv2-1)
+            self.conv31 = L.Convolution2D(ch3, cv3, pad=cv3-1)
+            self.conv32 = L.Convolution2D(ch3, cv3, pad=cv3-1)
 
     def forward(self, x):
         h = F.relu(self.conv11(x))
