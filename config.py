@@ -21,11 +21,11 @@ class Config:
     # フィルタの大きさ
     CONV_SIZE = 4
     # 第1層目のマップ数
-    CONV1_OUT_CHANNELS = 32
+    CONV1_OUT_CHANNELS = 24
     # 第2層目のマップ数
-    CONV2_OUT_CHANNELS = 64
+    CONV2_OUT_CHANNELS = 48
     # 第3層目のマップ数
-    CONV3_OUT_CHANNELS = 128
+    CONV3_OUT_CHANNELS = 96
 
     # -------------------------------------
     #  全結合層の情報
