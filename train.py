@@ -13,6 +13,8 @@ from read_data import read_data
 
 def parse_arg():
     parser = argparse.ArgumentParser(description='Train CNN')
+    parser.add_argument('-c', '--out_class_num', type=int, default=4,
+                        help='the number of output classes.')
     parser.add_argument('-n', '--image_num', type=int, default=5,
                         help='the number of images as a set of input.')
     parser.add_argument('-e', '--epoch', type=int, default=100,
@@ -40,8 +42,8 @@ def parse_arg():
     return parser.parse_args()
 
 
-def arrange_data(all_data, all_labels):
-    data_of_class = {i: [] for i in range(Config.NUM_CLASSES)}
+def arrange_data(num_classes, all_data, all_labels):
+    data_of_class = {i: [] for i in range(num_classes)}
     for d, l in zip(all_data, all_labels):
         data_of_class[l].append(d)
 
@@ -49,7 +51,7 @@ def arrange_data(all_data, all_labels):
 
     data = []
     labels = []
-    for i in range(Config.NUM_CLASSES):
+    for i in range(num_classes):
         d = data_of_class[i]
         data.extend([d[j % len(d)] for j in range(max_len)])
         labels.extend([i] * max_len)
@@ -62,7 +64,7 @@ def main():
         print('GPU and iDeep cannot use simultaneously.')
         return
 
-    model = L.Classifier(MyNet(args.image_num, gpuid=args.gpuid))
+    model = L.Classifier(MyNet(args.out_class_num, args.image_num, gpuid=args.gpuid))
     if 0 <= args.gpuid:
         cuda.get_device_from_id(args.gpuid).use()
         model.to_gpu()
@@ -78,8 +80,8 @@ def main():
         train_images, train_labels = read_data(args.train_data[0], args.image_num)
         test_images, test_labels = read_data(args.test_data, args.image_num)
         if args.arrange_data:
-            train_images, train_labels = arrange_data(train_images, train_labels)
-            test_images, test_labels = arrange_data(test_images, test_labels)
+            train_images, train_labels = arrange_data(args.out_class_num, train_images, train_labels)
+            test_images, test_labels = arrange_data(args.out_class_num, test_images, test_labels)
         train_data = chainer.datasets.TupleDataset(train_images, train_labels)
         test_data = chainer.datasets.TupleDataset(test_images, test_labels)
     else:

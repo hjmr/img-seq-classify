@@ -4,16 +4,16 @@ import numpy
 import chainer
 from chainer import serializers
 import chainer.functions as F
-import chainer.links as L
 from chainer.backends import cuda
 
 from MyNet import MyNet
-from config import Config
 from read_data import read_data
 
 
 def parse_arg():
     parser = argparse.ArgumentParser(description='Test CNN')
+    parser.add_argument('-c', '--out_class_num', type=int, default=4,
+                        help='the number of output classes.')
     parser.add_argument('-n', '--image_num', type=int, default=5,
                         help='the number of images as a set of input.')
     parser.add_argument('-m', '--model_file', type=str, nargs='+',
@@ -29,7 +29,7 @@ def main():
     args = parse_arg()
 
     test_images, test_labels = read_data(args.test_file[0], args.image_num)
-    model = MyNet(args.image_num, gpuid=args.gpuid)
+    model = MyNet(args.out_class_num, args.image_num, gpuid=args.gpuid)
 
     xp = numpy
     if 0 <= args.gpuid:
@@ -54,7 +54,7 @@ def main():
 
     # count TP,TF,FP,FF
     if test_labels is not None:
-        for c in range(Config.NUM_CLASSES):
+        for c in range(args.out_class_num):
             v = {'TP': 0, 'FP': 0, 'FN': 0, 'TN': 0}
             for p, t in results:
                 if t == c and p == c:

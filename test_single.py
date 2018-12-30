@@ -11,6 +11,8 @@ from read_data import read_one_image
 
 def parse_arg():
     parser = argparse.ArgumentParser(description='Test CNN')
+    parser.add_argument('-c', '--out_class_num', type=int, default=4,
+                        help='the number of output classes.')
     parser.add_argument('-n', '--image_num', type=int, default=5,
                         help='the number of images as a set of input.')
     parser.add_argument('-m', '--model_file', type=str, nargs=1,
@@ -23,7 +25,7 @@ def parse_arg():
 def main():
     args = parse_arg()
 
-    model = MyNet(args.image_num)
+    model = MyNet(args.out_class_num, args.image_num)
     serializers.load_npz(args.model_file[0], model)
 
     test_images = []
