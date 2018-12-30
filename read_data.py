@@ -1,6 +1,8 @@
+import argparse
+
 import numpy as np
-from config import Config
 from PIL import Image
+from config import Config
 
 
 def normalize_image(img):
@@ -49,3 +51,14 @@ def read_data(filename, image_num):
     if len(teach_data) == 0:
         teach_data = None
     return input_data, teach_data
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Test Read Data')
+    parser.add_argument('-n', '--image_num', type=int, default=5,
+                        help='the number of images as a set of input.')
+    parser.add_argument('data_file', type=str, nargs=1,
+                        help='a text file which contains image file name and corresponding label in each line.')
+    args = parser.parse_args()
+    images, labels = read_data(args.data_file[0], args.image_num)
+    print(labels)
