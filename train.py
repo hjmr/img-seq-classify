@@ -96,7 +96,10 @@ def main():
     trainer = training.Trainer(updater, (args.epoch, 'epoch'), out=args.output_dir)
     trainer.extend(extensions.Evaluator(test_iter, model, device=args.gpuid))
     trainer.extend(extensions.dump_graph('main/loss'))
-    trainer.extend(extensions.snapshot(), trigger=(args.save_interval, 'epoch'))
+    trainer.extend(extensions.snapshot(
+        filename='snapshot_epoch-{.updater.epoch}'), trigger=(args.save_interval, 'epoch'))
+    trainer.extend(extensions.snapshot_object(
+        model.predictor, filename='model_epoch-{.updater.epoch}'), trigger=(args.save_interval, 'epoch'))
     trainer.extend(extensions.LogReport())
 
     if args.plot and extensions.PlotReport.available():
@@ -118,7 +121,7 @@ def main():
     trainer.run()
 
     outfile = "{}/mynet.model".format(args.output_dir)
-    serializers.save_npz(outfile, model)
+    serializers.save_npz(outfile, model.predictor)
 
 
 if __name__ == '__main__':

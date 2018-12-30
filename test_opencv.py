@@ -25,7 +25,7 @@ def parse_arg():
 def main():
     args = parse_arg()
 
-    model = L.Classifier(MyNet(args.image_num))
+    model = MyNet(args.image_num)
     serializers.load_npz(args.model_file[0], model)
 
     vc = cv2.VideoCapture(0)
@@ -44,7 +44,7 @@ def main():
                         images.pop(0)
 
                     if len(images) == args.image_num:
-                        y = model.predictor.forward(np.array([np.concatenate(images)]))
+                        y = model.forward(np.array([np.concatenate(images)]))
                         pred = F.argmax(y)
                         print(pred.data)
 
