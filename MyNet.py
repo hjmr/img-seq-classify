@@ -8,15 +8,15 @@ from config import Config as Cnf
 
 
 class MySubNet(chainer.Chain):
-    def __init__(self, in_ch, ch1, cv1, ch2, cv2, ch3, cv3):
+    def __init__(self, ch1, cv1, ch2, cv2, ch3, cv3):
         super(MySubNet, self).__init__()
         with self.init_scope():
-            self.conv11 = L.Convolution2D(in_ch, ch1, cv1)
-            self.conv12 = L.Convolution2D(ch1, ch1, cv1)
-            self.conv21 = L.Convolution2D(ch1, ch2, cv2)
-            self.conv22 = L.Convolution2D(ch2, ch2, cv2)
-            self.conv31 = L.Convolution2D(ch2, ch3, cv3)
-            self.conv32 = L.Convolution2D(ch3, ch3, cv3)
+            self.conv11 = L.Convolution2D(ch1, cv1)
+            self.conv12 = L.Convolution2D(ch1, cv1)
+            self.conv21 = L.Convolution2D(ch2, cv2)
+            self.conv22 = L.Convolution2D(ch2, cv2)
+            self.conv31 = L.Convolution2D(ch3, cv3)
+            self.conv32 = L.Convolution2D(ch3, cv3)
 
     def forward(self, x):
         h = F.relu(self.conv11(x))
@@ -36,13 +36,11 @@ class MySubNet(chainer.Chain):
 
 class MyNet(chainer.Chain):
     def __init__(self, image_num, gpuid=-1):
-        img_channels = 1 if Cnf.IMAGE_MONO else 3
         super(MyNet, self).__init__()
         with self.init_scope():
             self.convNets = []
             for i in range(image_num):
-                self.convNets.append(MySubNet(img_channels,
-                                              Cnf.CONV1_OUT_CHANNELS, Cnf.CONV_SIZE,
+                self.convNets.append(MySubNet(Cnf.CONV1_OUT_CHANNELS, Cnf.CONV_SIZE,
                                               Cnf.CONV2_OUT_CHANNELS, Cnf.CONV_SIZE,
                                               Cnf.CONV3_OUT_CHANNELS, Cnf.CONV_SIZE))
             self.fullLayer1 = L.Linear(in_size=None, out_size=Cnf.NUM_HIDDEN_NEURONS2)
