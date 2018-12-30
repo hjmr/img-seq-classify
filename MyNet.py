@@ -22,15 +22,12 @@ class MySubNet(chainer.Chain):
         h = F.relu(self.conv11(x))
         h = F.relu(self.conv12(h))
         h = F.max_pooling_2d(h, ksize=(3, 3))
-        h = F.local_response_normalization(h)
         h = F.relu(self.conv21(h))
         h = F.relu(self.conv22(h))
         h = F.max_pooling_2d(h, ksize=(3, 3))
-        h = F.local_response_normalization(h)
         h = F.relu(self.conv31(h))
         h = F.relu(self.conv32(h))
         h = F.max_pooling_2d(h, ksize=(3, 3))
-        h = F.local_response_normalization(h)
         return h
 
 
