@@ -40,42 +40,44 @@ class MySubNet(chainer.Chain):
         return h
 
 
+class MySubNetList(chainer.ChainList):
+    def __init__(self, n_layers):
+        super(MySubNetList, self).__init__()
+        for _ in range(n_layers):
+            self.add_link(MySubNet())
+
+    def __call__(self, x):
+        x_inp = F.split_axis(x, len(self), axis=2)
+        h = [self[i].forward(x_inp[i]) for i in range(len(self))]
+        return h
+
+
 class MyNet(chainer.Chain):
     def __init__(self, out_size, image_num, gpuid=-1):
         super(MyNet, self).__init__()
         with self.init_scope():
-            self.convNets = []
-            for i in range(image_num):
-                self.convNets.append(MySubNet())
+            self.convNets = MySubNetList(image_num)
             self.fullLayer1 = L.Linear(in_size=None, out_size=NUM_HIDDEN_NEURONS1)
             self.fullLayer2 = L.Linear(in_size=None, out_size=NUM_HIDDEN_NEURONS2)
             self.fullLayer3 = L.Linear(in_size=None, out_size=out_size)
         self.gpuid = gpuid
         self.image_num = image_num
 
+    def __call__(self, x):
+        h = self.convNets(x)
+        h = F.concat(h, axis=2)
+        return self.calc_ffnn_layer(h)
+
     def to_gpu(self, device=None):
-        with cuda._get_device(device):
-            super(MyNet, self).to_gpu()
-            for net in self.convNets:
-                net.to_gpu()
+        super(MyNet, self).to_gpu()
+        self.convNets.to_gpu()
         return self
 
     def to_intel64(self):
         super(MyNet, self).to_intel64()
-        for net in self.convNets:
-            net.to_intel64()
-
-    def calc_cnn_layer(self, x):
-        x_inp = F.split_axis(x, self.image_num, axis=2)
-        h = [self.convNets[i].forward(x_inp[i]) for i in range(self.image_num)]
-        return h
+        self.convNets.to_intel64()
 
     def calc_ffnn_layer(self, x):
         h = F.dropout(F.relu(self.fullLayer1(x)))
         h = F.dropout(F.relu(self.fullLayer2(h)))
         return self.fullLayer3(h)
-
-    def forward(self, x):
-        h = self.calc_cnn_layer(x)
-        h = F.concat(h, axis=2)
-        return self.calc_ffnn_layer(h)
